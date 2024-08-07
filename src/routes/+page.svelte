@@ -2,9 +2,16 @@
 	import Toc from '$lib/components/toc.svelte';
 	import Backlinks from '$lib/components/backlinks.svelte';
 	import { onMount, afterUpdate } from 'svelte';
+	import katex from 'katex';
+	import 'katex/dist/katex.min.css';
+
 	/** @type {import('./$types').PageData} */
 	export let data;
-	$: ({ pageData, toc, backlinks } = data);
+	$: ({ pageData, pageMeta, toc, backlinks } = data);
+
+	$: hasPageMetaError = 'error' in pageMeta;
+	$: validPageMeta = hasPageMetaError ? null : pageMeta;
+
 	function slugify(text) {
 		return text
 			.toString()
@@ -15,8 +22,11 @@
 			.replace(/^-+/, '')
 			.replace(/-+$/, '');
 	}
+
 	let activeSection = '';
 	let headings = [];
+	let contentElement;
+
 	function setupHeadings() {
 		const contentElement = document.querySelector('.content');
 		if (contentElement) {
@@ -27,6 +37,7 @@
 			});
 		}
 	}
+
 	function updateActiveSection() {
 		let currentSection = '';
 		const contentElement = document.querySelector('.content');
@@ -42,9 +53,36 @@
 		}
 		activeSection = currentSection;
 	}
+
+	function renderLaTeX() {
+		if (contentElement) {
+			const mathElements = contentElement.querySelectorAll('script[type^="math/tex"]');
+			mathElements.forEach((el) => {
+				const texContent = el.textContent.trim();
+				const isDisplayMode = el.type.includes('mode=display');
+
+				try {
+					const katexElement = document.createElement('span');
+					katex.render(texContent, katexElement, {
+						throwOnError: false,
+						displayMode: isDisplayMode
+					});
+					el.parentNode.insertBefore(katexElement, el);
+					el.parentNode.removeChild(el);
+				} catch (error) {
+					console.error('KaTeX rendering error:', error);
+					const textNode = document.createTextNode(texContent);
+					el.parentNode.insertBefore(textNode, el);
+					el.parentNode.removeChild(el);
+				}
+			});
+		}
+	}
+
 	onMount(() => {
 		setupHeadings();
 		updateActiveSection();
+		renderLaTeX();
 		const contentElement = document.querySelector('.content');
 		if (contentElement) {
 			contentElement.addEventListener('scroll', updateActiveSection);
@@ -55,15 +93,36 @@
 			}
 		};
 	});
+
 	afterUpdate(() => {
 		setupHeadings();
 		updateActiveSection();
+		renderLaTeX();
 	});
 </script>
 
 <div class="page">
 	<div class="left">
-		<div class="content">
+		{#if hasPageMetaError}
+			<div class="error">
+				<h2>Error loading page metadata</h2>
+				<p>{pageMeta.error}</p>
+			</div>
+		{:else if validPageMeta}
+			<h1>{validPageMeta.title}</h1>
+			<div class="meta">
+				<div class="tags">
+					{#each validPageMeta.tags || [] as tag}
+						<div class="tag">{tag}</div>
+					{/each}
+				</div>
+			</div>
+		{:else}
+			<div class="warning">
+				<h2>No page metadata available</h2>
+			</div>
+		{/if}
+		<div class="content" bind:this={contentElement}>
 			{@html pageData.html}
 		</div>
 	</div>
@@ -74,15 +133,39 @@
 </div>
 
 <style>
-	@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap');
-	@import url('https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Karla:ital,wght@0,200..800;1,200..800&family=Quicksand:wght@300..700&family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap');
+	.tags {
+		display: flex;
+		gap: var(--spacing-04);
+		font-size: 16px;
+	}
+	.tag {
+		background: var(--tag);
+		padding: var(--spacing-02);
+	}
+	.meta {
+		margin-bottom: var(--spacing-06);
+	}
+	.error,
+	.warning {
+		padding: var(--spacing-04);
+		margin-bottom: var(--spacing-06);
+		border-radius: 4px;
+	}
+	.error {
+		background-color: #ffebee;
+		color: #c62828;
+	}
+	.warning {
+		background-color: #fff3e0;
+		color: #ef6c00;
+	}
 	:global(h1, h2, h3, h4, h5) {
-		font-family: 'IBM Plex Sans', serif;
+		font-family: 'IBM Plex Sans', sans-serif;
 		font-weight: 400;
 	}
 	:global(p, li) {
-		font-family: 'Karla', sans-serif;
-		line-height: 1.6;
+		font-family: 'IBM Plex Serif', sans-serif;
+		line-height: 1.7;
 		font-size: 18px;
 	}
 	.page {
@@ -103,17 +186,16 @@
 	.content {
 		flex-grow: 1;
 		overflow-y: scroll;
-		padding-right: 17px; /* Compensate for the hidden scrollbar */
-		margin-right: -17px; /* Hide the scrollbar */
-		-ms-overflow-style: none; /* IE and Edge */
-		scrollbar-width: none; /* Firefox */
+		padding-right: 17px;
+		margin-right: -17px;
+		-ms-overflow-style: none;
+		scrollbar-width: none;
 	}
 	.content::-webkit-scrollbar {
-		display: none; /* Chrome, Safari and Opera */
+		display: none;
 	}
 	.right {
-		width: 300px;
-		/* background-color: var(--layer-01); */
+		width: max-content;
 		height: 100vh;
 		box-sizing: border-box;
 		display: flex;

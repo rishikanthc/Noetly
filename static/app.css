@@ -1,0 +1,86 @@
+:root {
+	--background: #ffffff;
+	--background-inverse: #4c4c4c;
+	--layer-01: #f4f4f4;
+	--layer-02: #ffffff;
+	--layer-03: #f4f4f4;
+	--layer-04: #e0e0e0;
+	--text-primary: #161616;
+	--text-secondary: #525252;
+	--link-primary: #0f62fe;
+	--link-primary-hover: #0043ce;
+	--separator: #f4f4f4;
+	--tag: #c6c6c6;
+	--nav: var(--blue-06);
+
+	--scroll-color: #0e61fe;
+
+	--blue-06: #0043ce;
+	--blue-05: #0e61fe;
+
+	/* spacings */
+	--spacing-01: 0.125rem;
+	--spacing-02: 0.25rem;
+	--spacing-03: 0.5rem;
+	--spacing-04: 0.75rem;
+	--spacing-05: 1rem;
+	--spacing-06: 1.5rem;
+	--spacing-07: 2rem;
+	--spacing-08: 2.5rem;
+	--spacing-09: 3rem;
+	--spacing-10: 4rem;
+	--spacing-11: 5rem;
+	--spacing-12: 6rem;
+	--spacing-13: 10rem;
+
+	/* text sizes */
+	--text-01: 0.75rem;
+	--text-02: 0.875rem;
+	--text-03: 1rem;
+	--text-04: 1.125rem;
+	--text-05: 1.25rem;
+	--text-06: 1.5rem;
+	--text-07: 1.75rem;
+	--text-08: 2rem;
+	--text-09: 2.25rem;
+	--text-10: 2.625rem;
+	--text-11: 3rem;
+	--text-12: 3.375rem;
+	--text-13: 3.75rem;
+	--text-14: 4.25rem;
+	--text-15: 4.75rem;
+	--text-16: 5.25rem;
+	--text-17: 5.75rem;
+}
+
+[data-theme='dark'] {
+	--background: #161616;
+	--background-inverse: #f4f4f4;
+	--layer-01: #262626;
+	--layer-02: #393939;
+	--layer-03: #525252;
+	--layer-04: #262626;
+	--text-primary: #f4f4f4;
+	--text-secondary: #c6c6c6;
+	--link-primary: #78a9ff;
+	--link-primary-hover: #a6c8ff;
+	--tag: #393939;
+	--separator: #393939;
+	--nav: var(--blue-05);
+}
+
+body {
+	background-color: var(--background);
+	color: var(--text-primary);
+	padding: 0;
+	margin: 0;
+	font-family: 'IBM Plex Sans', sans-serif;
+}
+
+a {
+	color: var(--link-primary);
+}
+
+a:hover {
+	color: var(--link-primary-hover);
+}
