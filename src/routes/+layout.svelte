@@ -57,10 +57,6 @@
 		margin-top: var(--spacing-08);
 		height: max-content;
 	}
-	.name {
-		font-family: Lombok, sans-serif;
-		font-size: var(--text-06);
-	}
 	.listnav {
 		flex-grow: 1;
 		overflow-y: auto;
